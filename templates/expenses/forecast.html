@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Forecast</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0d1117;
+            color: #e6edf3;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #58a6ff;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #30363d;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .flex-column {
+            flex: 1;
+        }
+
+        canvas {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .stat {
+            font-size: 1.6rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .green {
+            color: #3fb950;
+        }
+
+        .red {
+            color: #f85149;
+        }
+
+        .warning-box {
+            background: #f0ad4e22;
+            border-left: 4px solid #f0ad4e;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #21262d;
+            color: #58a6ff;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Expense Forecast</h1>
+
+    {% if warning %}
+        <div class="warning-box">
+            {{ warning }}
+        </div>
+    {% endif %}
+
+    <!-- Prediction Stats -->
+    <div class="card">
+        <h2>Next Month Forecast</h2>
+        <p class="stat">
+            Predicted Total: ₹ {{ predicted_next_month_total }}
+        </p>
+
+        {% if predicted_change_pct %}
+            {% if predicted_change_pct > 0 %}
+                <p class="stat red">
+                    Expected Increase: +{{ predicted_change_pct }}%
+                </p>
+            {% else %}
+                <p class="stat green">
+                    Expected Decrease: {{ predicted_change_pct }}%
+                </p>
+            {% endif %}
+        {% endif %}
+
+        <p class="tag">
+            Model: {% if prophet_used %} Prophet {% else %} Linear Regression (Fallback) {% endif %}
+        </p>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="flex-row">
+        <div class="flex-column card">
+            <h2>Last 90 Days History</h2>
+            <canvas id="historyChart"></canvas>
+        </div>
+
+        <div class="flex-column card">
+            <h2>30-Day Forecast</h2>
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const historyDates = {{ history_dates|safe }};
+    const historyValues = {{ history_values|safe }};
+    const forecastDates = {{ forecast_dates|safe }};
+    const forecastValues = {{ forecast_values|safe }};
+
+    // History chart
+    new Chart(document.getElementById("historyChart"), {
+        type: "line",
+        data: {
+            labels: historyDates,
+            datasets: [{
+                label: "Daily Expense (₹)",
+                data: historyValues,
+                borderWidth: 2,
+                borderColor: "rgba(88,166,255,0.9)",
+                pointRadius: 0,
+                tension: 0.4
+            }]
+        },
+        options: {
+            scales: {
+                x: { ticks: { color: "#999" } },
+                y: { ticks: { color: "#999" } }
+            }
+        }
+    });
+
+    // Forecast chart
+    new Chart(document.getElementById("forecastChart"), {
+        type: "line",
+        data: {
+            labels: forecastDates,
+            datasets: [{
+                label: "Predicted Expense (₹)",
+                data: forecastValues,
+                borderWidth: 2,
+                borderColor: "rgba(63,185,80,0.9)",
+                pointRadius: 0,
+                tension: 0.4
+            }]
+        },
+        options: {
+            scales: {
+                x: { ticks: { color: "#999" } },
+                y: { ticks: { color: "#999" } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

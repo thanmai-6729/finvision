@@ -154,13 +154,14 @@ MESSAGE_TAGS = {
 
 # Email Settings
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Disable real email sending during development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Keep Gmail settings for later production use
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'hemantshirsath24@gmail.com'
-EMAIL_HOST_PASSWORD = 'gjxu zgem wvtv vklu'
-DEFAULT_FROM_EMAIL = 'hemantshirsath24@gmail.com'
+EMAIL_HOST_USER = 'thanmaipandu2005@gmail.com'
+EMAIL_HOST_PASSWORD = 'vqzdbptdjwpcbmwu'  # remove spaces
+DEFAULT_FROM_EMAIL = 'thanmaipandu2005@gmail.com'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

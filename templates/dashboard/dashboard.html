@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">Finance Overview</h3>
+
+    <!-- TOP CARDS -->
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3">
+                <h6>Total Expenses</h6>
+                <h3 class="text-primary">₹ {{ total_expenses }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3">
+                <h6>This Month</h6>
+                <h3 class="text-success">₹ {{ monthly_expense }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3">
+                <h6>Top Category</h6>
+
+                {% if category_summary %}
+                    {% with sorted_items=category_summary.items|dictsort:"1" %}
+                        {% with top_item=sorted_items|last %}
+                            <h3 class="text-danger">{{ top_item.0 }}</h3>
+                        {% endwith %}
+                    {% endwith %}
+                {% else %}
+                    <h3>—</h3>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm p-4">
+                <h4 class="mb-3">AI Insights 🔍</h4>
+
+                {% if insights %}
+                    <ul>
+                        {% for insight in insights %}
+                            <li style="font-size: 16px; margin-bottom: 8px;">{{ insight }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No insights yet. Add more expenses to generate patterns 🤖📊</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- SMART SUGGESTIONS -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="card shadow-sm p-4">
+                <h5 class="mb-3">Smart Suggestions 🤖</h5>
+
+                {% if suggestions %}
+                    <div class="list-group">
+                        {% for s in suggestions %}
+                            {% if s.level == "critical" %}
+                                <div class="list-group-item list-group-item-danger">
+                                    <strong>⚠️ {{ s.message }}</strong>
+                                    {% if s.detail %}<div class="small mt-1">{{ s.detail }}</div>{% endif %}
+                                </div>
+
+                            {% elif s.level == "warning" %}
+                                <div class="list-group-item list-group-item-warning">
+                                    <strong>🔔 {{ s.message }}</strong>
+                                    {% if s.detail %}<div class="small mt-1">{{ s.detail }}</div>{% endif %}
+                                </div>
+
+                            {% else %}
+                                <div class="list-group-item list-group-item-light">
+                                    <strong>💡 {{ s.message }}</strong>
+                                    {% if s.detail %}<div class="small mt-1">{{ s.detail }}</div>{% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No suggestions available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row mt-4">
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="mb-3">Category Distribution</h6>
+                <canvas id="categoryPie"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="mb-3">Weekly Spending</h6>
+                <canvas id="weeklyBar"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    const categoryLabels = {{ category_summary.keys|safe }};
+    const categoryValues = {{ category_summary.values|safe }};
+
+    const weekLabels = {{ weekly_expense.keys|safe }};
+    const weekValues = {{ weekly_expense.values|safe }};
+
+    new Chart(document.getElementById("categoryPie"), {
+        type: "pie",
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues
+            }]
+        }
+    });
+
+    new Chart(document.getElementById("weeklyBar"), {
+        type: "bar",
+        data: {
+            labels: weekLabels,
+            datasets: [{
+                data: weekValues
+            }]
+            
+        }
+    });
+</script>
+{% endblock %}
